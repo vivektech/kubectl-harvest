@@ -248,16 +248,21 @@ func (r *runner) completeResources(f cmdutil.Factory, resourceTypes string) erro
 	return r.result.Err()
 }
 
+var (
+	errOnlyResourceTypeArgs = errors.New("arguments must be only resource type(s)")
+	errForceWithGracePeriod = errors.New("--force and --grace-period greater than 0 cannot be specified together")
+)
+
 func (r *runner) Validate(args []string) error {
 	if len(args) != 1 && !r.showVersion {
-		return errors.New("arguments must be only resource type(s)")
+		return errOnlyResourceTypeArgs
 	}
 
 	switch {
 	case r.forceDeletion && r.gracePeriod == 0:
 		r.Errorf("warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.\n")
 	case r.forceDeletion && r.gracePeriod > 0:
-		return fmt.Errorf("--force and --grace-period greater than 0 cannot be specified together")
+		return errForceWithGracePeriod
 	}
 
 	return nil
@@ -297,7 +302,8 @@ func (r *runner) Run(ctx context.Context, f cmdutil.Factory) error {
 		deletedInfos = append(deletedInfos, info)
 
 		if r.dryRunStrategy == cmdutil.DryRunClient && !r.quiet {
-			r.printObj(info.Object)
+			// Printing is best-effort; a printer failure must not abort the run.
+			_ = r.printObj(info.Object)
 			return nil // skip deletion
 		}
 
@@ -310,7 +316,8 @@ func (r *runner) Run(ctx context.Context, f cmdutil.Factory) error {
 		}
 
 		if !r.quiet {
-			r.printObj(info.Object)
+			// Printing is best-effort; a printer failure must not abort the run.
+			_ = r.printObj(info.Object)
 		}
 
 		loc := cmdwait.ResourceLocation{
@@ -369,11 +376,13 @@ func (r *runner) waitDeletion(ctx context.Context, uidMap cmdwait.UIDMap, delete
 }
 
 func (r *runner) Infof(format string, a ...interface{}) {
-	fmt.Fprintf(r.Out, format, a...)
+	// Output is best-effort; write failures must not abort the run.
+	_, _ = fmt.Fprintf(r.Out, format, a...)
 }
 
 func (r *runner) Errorf(format string, a ...interface{}) {
-	fmt.Fprintf(r.ErrOut, format, a...)
+	// Output is best-effort; write failures must not abort the run.
+	_, _ = fmt.Fprintf(r.ErrOut, format, a...)
 }
 
 func (r *runner) printObj(obj runtime.Object) error {

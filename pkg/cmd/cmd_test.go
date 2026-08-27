@@ -154,8 +154,6 @@ func Test_runner_Run(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			streams, _, out, _ := genericclioptions.NewTestIOStreams()
 
@@ -184,7 +182,7 @@ func Test_runner_Run(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(tt.wantOut, out.String()); diff != "" {
-				t.Errorf("(-want +got):\n%s", diff)
+				t.Errorf("(-want +got):\n%s\n", diff)
 				return
 			}
 		})

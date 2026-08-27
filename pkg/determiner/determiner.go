@@ -2,6 +2,7 @@ package determiner
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -33,6 +34,8 @@ var ingressSecretAnnotations = []string{
 	"nginx.ingress.kubernetes.io/auth-secret",
 	"nginx.ingress.kubernetes.io/auth-tls-secret",
 }
+
+var errUnsupportedKind = errors.New("unsupported kind")
 
 var checkVolumeSatisfyClaimFunc = resource.CheckVolumeSatisfyClaim
 
@@ -273,7 +276,7 @@ func (d *determiner) DetermineDeletion(ctx context.Context, info *cliresource.In
 		return d.determineDeletionNetworkPolicy(info)
 
 	default:
-		return false, fmt.Errorf("unsupported kind: %s/%s", kind, info.Name)
+		return false, fmt.Errorf("%w: %s/%s", errUnsupportedKind, kind, info.Name)
 	}
 }
 

@@ -152,6 +152,22 @@ func Test_determiner_DetermineDeletion(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "kube-root-ca.crt ConfigMap should never be deleted",
+			args: args{
+				info: &cliresource.Info{
+					Name:      "kube-root-ca.crt",
+					Namespace: fakeNamespace,
+					Object: &corev1.ConfigMap{
+						TypeMeta: metav1.TypeMeta{
+							Kind: resource.KindConfigMap,
+						},
+					},
+				},
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
 			name: "Secret should be deleted when it is not used",
 			args: args{
 				info: &cliresource.Info{
@@ -182,6 +198,23 @@ func Test_determiner_DetermineDeletion(t *testing.T) {
 						TypeMeta: metav1.TypeMeta{
 							Kind: resource.KindSecret,
 						},
+					},
+				},
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "ServiceAccount token Secret should never be deleted",
+			args: args{
+				info: &cliresource.Info{
+					Name:      fakeSecret,
+					Namespace: fakeNamespace,
+					Object: &corev1.Secret{
+						TypeMeta: metav1.TypeMeta{
+							Kind: resource.KindSecret,
+						},
+						Type: corev1.SecretTypeServiceAccountToken,
 					},
 				},
 			},
@@ -257,39 +290,6 @@ func Test_determiner_DetermineDeletion(t *testing.T) {
 							Kind: resource.KindJob,
 						},
 						Status: batchv1.JobStatus{},
-					},
-				},
-			},
-			want:    false,
-			wantErr: false,
-		},
-		{
-			name: "kube-root-ca.crt ConfigMap should never be deleted",
-			args: args{
-				info: &cliresource.Info{
-					Name:      "kube-root-ca.crt",
-					Namespace: fakeNamespace,
-					Object: &corev1.ConfigMap{
-						TypeMeta: metav1.TypeMeta{
-							Kind: resource.KindConfigMap,
-						},
-					},
-				},
-			},
-			want:    false,
-			wantErr: false,
-		},
-		{
-			name: "ServiceAccount token Secret should never be deleted",
-			args: args{
-				info: &cliresource.Info{
-					Name:      fakeSecret,
-					Namespace: fakeNamespace,
-					Object: &corev1.Secret{
-						TypeMeta: metav1.TypeMeta{
-							Kind: resource.KindSecret,
-						},
-						Type: corev1.SecretTypeServiceAccountToken,
 					},
 				},
 			},
@@ -525,8 +525,6 @@ func Test_determiner_DetermineDeletion(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -571,8 +569,8 @@ func Test_determiner_DetermineDeletion_ReplicaSet_KeepRevisions(t *testing.T) {
 		},
 	}
 
-	// ReplicaSets at revisions 1..7, all scaled to zero, all owned by the
-	// Deployment.
+	// newRS returns a ReplicaSet at the given revision, scaled to zero and
+	// owned by the Deployment.
 	newRS := func(revision int) *appsv1.ReplicaSet {
 		controller := true
 		return &appsv1.ReplicaSet{
@@ -599,6 +597,8 @@ func Test_determiner_DetermineDeletion_ReplicaSet_KeepRevisions(t *testing.T) {
 		}
 	}
 
+	// ReplicaSets at revisions 1..7, all scaled to zero, all owned by the
+	// Deployment.
 	allReplicaSets := func() []*appsv1.ReplicaSet {
 		var rss []*appsv1.ReplicaSet
 		for revision := 1; revision <= 7; revision++ {
@@ -659,8 +659,6 @@ func Test_determiner_DetermineDeletion_ReplicaSet_KeepRevisions(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -747,20 +745,16 @@ func Test_determiner_DetermineDeletion_ReplicaSet(t *testing.T) {
 		want        bool
 	}{
 		{
-			name: "ReplicaSet with 0 replicas and old revision should be deleted",
-			rs:   rsOwner(fakeReplicaSetOld, revisionOld),
-			deployments: []*appsv1.Deployment{
-				newDeployment(),
-			},
-			want: true,
+			name:        "ReplicaSet with 0 replicas and old revision should be deleted",
+			rs:          rsOwner(fakeReplicaSetOld, revisionOld),
+			deployments: []*appsv1.Deployment{newDeployment()},
+			want:        true,
 		},
 		{
-			name: "ReplicaSet with 0 replicas but live revision of its Deployment should not be deleted",
-			rs:   rsOwner(fakeReplicaSetLive, revisionCurrent),
-			deployments: []*appsv1.Deployment{
-				newDeployment(),
-			},
-			want: false,
+			name:        "ReplicaSet with 0 replicas but live revision of its Deployment should not be deleted",
+			rs:          rsOwner(fakeReplicaSetLive, revisionCurrent),
+			deployments: []*appsv1.Deployment{newDeployment()},
+			want:        false,
 		},
 		{
 			name: "ReplicaSet with 0 replicas and no owner should be deleted",
@@ -774,10 +768,8 @@ func Test_determiner_DetermineDeletion_ReplicaSet(t *testing.T) {
 					Replicas: &zero,
 				},
 			},
-			deployments: []*appsv1.Deployment{
-				newDeployment(),
-			},
-			want: true,
+			deployments: []*appsv1.Deployment{newDeployment()},
+			want:        true,
 		},
 		{
 			name: "ReplicaSet with non-zero replicas should not be deleted",
@@ -791,16 +783,12 @@ func Test_determiner_DetermineDeletion_ReplicaSet(t *testing.T) {
 					Replicas: &two,
 				},
 			},
-			deployments: []*appsv1.Deployment{
-				newDeployment(),
-			},
-			want: false,
+			deployments: []*appsv1.Deployment{newDeployment()},
+			want:        false,
 		},
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -937,8 +925,6 @@ func Test_determiner_DetermineDeletion_PersistentVolume(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -1043,8 +1029,6 @@ func Test_determiner_DetermineDeletion_HorizontalPodAutoscaler(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -1238,8 +1222,6 @@ func Test_determiner_determineUsedPodDisruptionBudget(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -1265,11 +1247,13 @@ func Test_determiner_determineUsedSecret(t *testing.T) {
 		fakeNamespace = "fake-ns"
 		fakeSecret    = "fake-secret"
 	)
+
 	type fields struct {
 		podSpecs  []podSpecRef
 		sas       []*corev1.ServiceAccount
 		ingresses []*networkingv1.Ingress
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -1374,9 +1358,8 @@ func Test_determiner_determineUsedSecret(t *testing.T) {
 			want: map[string]struct{}{fakeNamespace + "/" + fakeSecret: {}},
 		},
 	}
-	for _, tt := range tests {
-		tt := tt
 
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -1451,8 +1434,6 @@ func Test_determiner_detectUsedConfigMaps(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -1475,6 +1456,9 @@ func Test_determiner_detectUsedSecrets_ExternalSecret(t *testing.T) {
 		fakeExternalSecret = "fake-external-secret"
 	)
 
+	// newExternalSecret builds an ExternalSecret CR; when targetName is set
+	// the managed Secret is named explicitly, otherwise it defaults to the
+	// object name (kubernetes-client.io behavior).
 	newExternalSecret := func(namespace, name, targetName string) *unstructured.Unstructured {
 		es := &unstructured.Unstructured{
 			Object: map[string]interface{}{
@@ -1517,8 +1501,6 @@ func Test_determiner_detectUsedSecrets_ExternalSecret(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
