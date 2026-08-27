@@ -46,7 +46,7 @@ func checkCapacitySatisfyRequest(volume *corev1.PersistentVolume, claim *corev1.
 	volumeQty := volume.Spec.Capacity[corev1.ResourceStorage]
 	volumeSize := volumeQty.Value()
 
-	requestedQty := claim.Spec.Resources.Requests[corev1.ResourceName(corev1.ResourceStorage)]
+	requestedQty := claim.Spec.Resources.Requests[corev1.ResourceStorage]
 	requestedSize := requestedQty.Value()
 
 	return volumeSize >= requestedSize

@@ -161,7 +161,7 @@ func NewCmdReap(streams genericclioptions.IOStreams) *cobra.Command {
 	return cmd
 }
 
-func (r *runner) Complete(f cmdutil.Factory, args []string, cmd *cobra.Command) (err error) {
+func (r *runner) Complete(f cmdutil.Factory, args []string, cmd *cobra.Command) error {
 	if !r.forceDeletion && r.gracePeriod == 0 {
 		// To preserve backwards compatibility, but prevent accidental data loss, we convert --grace-period=0
 		// into --grace-period=1. Users may provide --force to bypass this conversion.
@@ -175,31 +175,32 @@ func (r *runner) Complete(f cmdutil.Factory, args []string, cmd *cobra.Command) 
 		r.deleteOpts = metav1.NewDeleteOptions(int64(r.gracePeriod))
 	}
 
+	var err error
 	r.namespace, _, err = r.configFlags.ToRawKubeConfigLoader().Namespace()
 	if err != nil {
-		return
+		return err
 	}
 
 	r.dryRunStrategy, err = cmdutil.GetDryRunStrategy(cmd)
 	if err != nil {
-		return
+		return err
 	}
 
-	if err = r.completePrinter(); err != nil {
-		return
+	if err := r.completePrinter(); err != nil {
+		return err
 	}
 
-	if err = r.completeResources(f, args[0]); err != nil {
-		return
+	if err := r.completeResources(f, args[0]); err != nil {
+		return err
 	}
 
 	clientset, err := f.KubernetesClientSet()
 	if err != nil {
-		return
+		return err
 	}
 	r.dynamicClient, err = f.DynamicClient()
 	if err != nil {
-		return
+		return err
 	}
 	resourceClient := resource.NewClient(clientset, r.dynamicClient)
 
@@ -212,10 +213,10 @@ func (r *runner) Complete(f cmdutil.Factory, args []string, cmd *cobra.Command) 
 		KeepRevisions: r.keepRevisions,
 	})
 	if err != nil {
-		return
+		return err
 	}
 
-	return
+	return nil
 }
 
 func (r *runner) completePrinter() (err error) {
@@ -273,6 +274,10 @@ func (r *runner) Run(ctx context.Context, f cmdutil.Factory) error {
 	uidMap := cmdwait.UIDMap{}
 
 	if err := r.result.Visit(func(info *cliresource.Info, err error) error {
+		if err != nil {
+			return err
+		}
+
 		if info.Namespace == metav1.NamespaceSystem {
 			return nil // ignore resources in kube-system namespace
 		}

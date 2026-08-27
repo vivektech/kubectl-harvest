@@ -32,7 +32,7 @@ func TestCheckVolumeSatisfyClaim(t *testing.T) {
 				volume: &corev1.PersistentVolume{
 					Spec: corev1.PersistentVolumeSpec{
 						Capacity: corev1.ResourceList{
-							corev1.ResourceName(corev1.ResourceStorage): apiresource.MustParse(fakeResourceQtyHigh),
+							corev1.ResourceStorage: apiresource.MustParse(fakeResourceQtyHigh),
 						},
 						StorageClassName: fakeStorageClass1,
 						VolumeMode:       &fakeVolumeMode,
@@ -46,7 +46,7 @@ func TestCheckVolumeSatisfyClaim(t *testing.T) {
 					Spec: corev1.PersistentVolumeClaimSpec{
 						Resources: corev1.VolumeResourceRequirements{
 							Requests: corev1.ResourceList{
-								corev1.ResourceName(corev1.ResourceStorage): apiresource.MustParse(fakeResourceQtyLow),
+								corev1.ResourceStorage: apiresource.MustParse(fakeResourceQtyLow),
 							},
 						},
 						StorageClassName: &fakeStorageClass1,
@@ -65,7 +65,7 @@ func TestCheckVolumeSatisfyClaim(t *testing.T) {
 				volume: &corev1.PersistentVolume{
 					Spec: corev1.PersistentVolumeSpec{
 						Capacity: corev1.ResourceList{
-							corev1.ResourceName(corev1.ResourceStorage): apiresource.MustParse(fakeResourceQtyHigh),
+							corev1.ResourceStorage: apiresource.MustParse(fakeResourceQtyHigh),
 						},
 						StorageClassName: fakeStorageClass1,
 						VolumeMode:       &fakeVolumeMode,
@@ -79,7 +79,7 @@ func TestCheckVolumeSatisfyClaim(t *testing.T) {
 					Spec: corev1.PersistentVolumeClaimSpec{
 						Resources: corev1.VolumeResourceRequirements{
 							Requests: corev1.ResourceList{
-								corev1.ResourceName(corev1.ResourceStorage): apiresource.MustParse(fakeResourceQtyLow),
+								corev1.ResourceStorage: apiresource.MustParse(fakeResourceQtyLow),
 							},
 						},
 						StorageClassName: &fakeStorageClass2,
@@ -95,8 +95,6 @@ func TestCheckVolumeSatisfyClaim(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

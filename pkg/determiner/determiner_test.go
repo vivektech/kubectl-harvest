@@ -1451,8 +1451,9 @@ func Test_determiner_detectUsedConfigMaps(t *testing.T) {
 
 func Test_determiner_detectUsedSecrets_ExternalSecret(t *testing.T) {
 	const (
-		fakeNamespace      = "fake-ns"
-		fakeSecretExplicit = "fake-secret-explicit"
+		fakeNamespace = "fake-ns"
+		// Fake test fixture, not a real credential.
+		fakeSecretExplicit = "fake-secret-explicit" //nolint:gosec
 		fakeExternalSecret = "fake-external-secret"
 	)
 

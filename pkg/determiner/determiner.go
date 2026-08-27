@@ -67,6 +67,9 @@ type determiner struct {
 	replicaSets            []*appsv1.ReplicaSet
 	deployments            []*appsv1.Deployment
 	persistentVolumeClaims []*corev1.PersistentVolumeClaim
+	serviceAccounts        []*corev1.ServiceAccount
+	ingresses              []*networkingv1.Ingress
+	externalSecrets        []*unstructured.Unstructured
 
 	// keepRevisions is the number of newest ReplicaSet revisions of each
 	// Deployment that are always kept when reaping ReplicaSets, so that
@@ -86,12 +89,18 @@ type Options struct {
 	KeepRevisions int
 }
 
-func New(resourceClient resource.Client, r *cliresource.Result, namespace string, opts Options) (Determiner, error) {
-	d := &determiner{
-		resourceClient: resourceClient,
-		keepRevisions:  opts.KeepRevisions,
-	}
+// referenceNeeds describes which reference sources must be listed before
+// deciding what can be deleted, derived from the kinds being reaped.
+type referenceNeeds struct {
+	pods                   bool
+	podTemplates           bool
+	replicaSets            bool
+	deployments            bool
+	persistentVolumeClaims bool
+	secretReferences       bool
+}
 
+func New(resourceClient resource.Client, r *cliresource.Result, namespace string, opts Options) (Determiner, error) {
 	var (
 		reapConfigMaps             bool
 		reapSecrets                bool
@@ -103,6 +112,10 @@ func New(resourceClient resource.Client, r *cliresource.Result, namespace string
 	)
 
 	if err := r.Visit(func(info *cliresource.Info, err error) error {
+		if err != nil {
+			return err
+		}
+
 		switch info.Object.GetObjectKind().GroupVersionKind().Kind {
 		case resource.KindConfigMap:
 			reapConfigMaps = true
@@ -124,107 +137,23 @@ func New(resourceClient resource.Client, r *cliresource.Result, namespace string
 		return nil, err
 	}
 
-	ctx := context.Background()
-
-	needsPodTemplates := reapConfigMaps || reapSecrets
-	needsPods := needsPodTemplates || reapPersistentVolumeClaims || reapPodDisruptionBudgets || reapNetworkPolicies
-
-	if needsPods {
-		var err error
-		d.pods, err = d.resourceClient.ListPods(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		for _, pod := range d.pods {
-			d.podSpecs = append(d.podSpecs, podSpecRef{namespace: pod.Namespace, labels: pod.Labels, spec: pod.Spec})
-		}
+	d := &determiner{
+		resourceClient: resourceClient,
+		keepRevisions:  opts.KeepRevisions,
 	}
 
-	if needsPodTemplates || reapReplicaSets {
-		var err error
-		d.replicaSets, err = d.resourceClient.ListReplicaSets(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		for _, rs := range d.replicaSets {
-			d.podSpecs = append(d.podSpecs, podSpecRef{namespace: rs.Namespace, labels: rs.Spec.Template.Labels, spec: rs.Spec.Template.Spec})
-		}
+	needs := referenceNeeds{
+		pods: reapConfigMaps || reapSecrets ||
+			reapPersistentVolumeClaims || reapPodDisruptionBudgets || reapNetworkPolicies,
+		podTemplates:           reapConfigMaps || reapSecrets,
+		replicaSets:            reapConfigMaps || reapSecrets || reapReplicaSets,
+		deployments:            reapConfigMaps || reapSecrets || reapReplicaSets,
+		persistentVolumeClaims: reapPersistentVolumes,
+		secretReferences:       reapSecrets,
 	}
 
-	if needsPodTemplates || reapReplicaSets {
-		var err error
-		d.deployments, err = d.resourceClient.ListDeployments(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		if needsPodTemplates {
-			for _, deploy := range d.deployments {
-				d.podSpecs = append(d.podSpecs, podSpecRef{namespace: deploy.Namespace, labels: deploy.Spec.Template.Labels, spec: deploy.Spec.Template.Spec})
-			}
-		}
-	}
-
-	if needsPodTemplates {
-		stss, err := d.resourceClient.ListStatefulSets(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		for _, sts := range stss {
-			d.podSpecs = append(d.podSpecs, podSpecRef{namespace: sts.Namespace, labels: sts.Spec.Template.Labels, spec: sts.Spec.Template.Spec})
-		}
-
-		dss, err := d.resourceClient.ListDaemonSets(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		for _, ds := range dss {
-			d.podSpecs = append(d.podSpecs, podSpecRef{namespace: ds.Namespace, labels: ds.Spec.Template.Labels, spec: ds.Spec.Template.Spec})
-		}
-
-		jobs, err := d.resourceClient.ListJobs(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		for _, job := range jobs {
-			d.podSpecs = append(d.podSpecs, podSpecRef{namespace: job.Namespace, labels: job.Spec.Template.Labels, spec: job.Spec.Template.Spec})
-		}
-
-		cronJobs, err := d.resourceClient.ListCronJobs(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		for _, cronJob := range cronJobs {
-			d.podSpecs = append(d.podSpecs, podSpecRef{namespace: cronJob.Namespace, labels: cronJob.Spec.JobTemplate.Spec.Template.Labels, spec: cronJob.Spec.JobTemplate.Spec.Template.Spec})
-		}
-	}
-
-	if reapPersistentVolumes {
-		var err error
-		d.persistentVolumeClaims, err = d.resourceClient.ListPersistentVolumeClaims(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	var (
-		sas             []*corev1.ServiceAccount
-		ingresses       []*networkingv1.Ingress
-		externalSecrets []*unstructured.Unstructured
-	)
-	if reapSecrets {
-		var err error
-		sas, err = d.resourceClient.ListServiceAccounts(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		ingresses, err = d.resourceClient.ListIngresses(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
-		externalSecrets, err = d.resourceClient.ListExternalSecrets(ctx, namespace)
-		if err != nil {
-			return nil, err
-		}
+	if err := d.collectReferences(context.Background(), namespace, needs); err != nil {
+		return nil, err
 	}
 
 	if reapConfigMaps {
@@ -232,7 +161,7 @@ func New(resourceClient resource.Client, r *cliresource.Result, namespace string
 	}
 
 	if reapSecrets {
-		d.usedSecrets = d.detectUsedSecrets(sas, ingresses, externalSecrets)
+		d.usedSecrets = d.detectUsedSecrets(d.serviceAccounts, d.ingresses, d.externalSecrets)
 	}
 
 	if reapPersistentVolumeClaims {
@@ -240,6 +169,132 @@ func New(resourceClient resource.Client, r *cliresource.Result, namespace string
 	}
 
 	return d, nil
+}
+
+// collectReferences lists the reference sources needed for the kinds being
+// reaped and records Pod specs and template labels for the usage maps.
+func (d *determiner) collectReferences(ctx context.Context, namespace string, needs referenceNeeds) error {
+	if needs.pods {
+		var err error
+		d.pods, err = d.resourceClient.ListPods(ctx, namespace)
+		if err != nil {
+			return err
+		}
+		for _, pod := range d.pods {
+			d.podSpecs = append(d.podSpecs, podSpecRef{namespace: pod.Namespace, labels: pod.Labels, spec: pod.Spec})
+		}
+	}
+
+	if needs.replicaSets {
+		var err error
+		d.replicaSets, err = d.resourceClient.ListReplicaSets(ctx, namespace)
+		if err != nil {
+			return err
+		}
+		if needs.podTemplates {
+			for _, rs := range d.replicaSets {
+				d.podSpecs = append(d.podSpecs, podSpecRef{namespace: rs.Namespace, labels: rs.Spec.Template.Labels, spec: rs.Spec.Template.Spec})
+			}
+		}
+	}
+
+	if needs.deployments {
+		var err error
+		d.deployments, err = d.resourceClient.ListDeployments(ctx, namespace)
+		if err != nil {
+			return err
+		}
+		if needs.podTemplates {
+			for _, deploy := range d.deployments {
+				d.podSpecs = append(d.podSpecs, podSpecRef{namespace: deploy.Namespace, labels: deploy.Spec.Template.Labels, spec: deploy.Spec.Template.Spec})
+			}
+		}
+	}
+
+	if needs.podTemplates {
+		if err := d.collectStatefulSets(ctx, namespace); err != nil {
+			return err
+		}
+		if err := d.collectDaemonSets(ctx, namespace); err != nil {
+			return err
+		}
+		if err := d.collectJobs(ctx, namespace); err != nil {
+			return err
+		}
+		if err := d.collectCronJobs(ctx, namespace); err != nil {
+			return err
+		}
+	}
+
+	if needs.persistentVolumeClaims {
+		var err error
+		d.persistentVolumeClaims, err = d.resourceClient.ListPersistentVolumeClaims(ctx, namespace)
+		if err != nil {
+			return err
+		}
+	}
+
+	if needs.secretReferences {
+		var err error
+		d.serviceAccounts, err = d.resourceClient.ListServiceAccounts(ctx, namespace)
+		if err != nil {
+			return err
+		}
+		d.ingresses, err = d.resourceClient.ListIngresses(ctx, namespace)
+		if err != nil {
+			return err
+		}
+		d.externalSecrets, err = d.resourceClient.ListExternalSecrets(ctx, namespace)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (d *determiner) collectStatefulSets(ctx context.Context, namespace string) error {
+	stss, err := d.resourceClient.ListStatefulSets(ctx, namespace)
+	if err != nil {
+		return err
+	}
+	for _, sts := range stss {
+		d.podSpecs = append(d.podSpecs, podSpecRef{namespace: sts.Namespace, labels: sts.Spec.Template.Labels, spec: sts.Spec.Template.Spec})
+	}
+	return nil
+}
+
+func (d *determiner) collectDaemonSets(ctx context.Context, namespace string) error {
+	dss, err := d.resourceClient.ListDaemonSets(ctx, namespace)
+	if err != nil {
+		return err
+	}
+	for _, ds := range dss {
+		d.podSpecs = append(d.podSpecs, podSpecRef{namespace: ds.Namespace, labels: ds.Spec.Template.Labels, spec: ds.Spec.Template.Spec})
+	}
+	return nil
+}
+
+func (d *determiner) collectJobs(ctx context.Context, namespace string) error {
+	jobs, err := d.resourceClient.ListJobs(ctx, namespace)
+	if err != nil {
+		return err
+	}
+	for _, job := range jobs {
+		d.podSpecs = append(d.podSpecs, podSpecRef{namespace: job.Namespace, labels: job.Spec.Template.Labels, spec: job.Spec.Template.Spec})
+	}
+	return nil
+}
+
+func (d *determiner) collectCronJobs(ctx context.Context, namespace string) error {
+	cronJobs, err := d.resourceClient.ListCronJobs(ctx, namespace)
+	if err != nil {
+		return err
+	}
+	for _, cronJob := range cronJobs {
+		d.podSpecs = append(d.podSpecs, podSpecRef{namespace: cronJob.Namespace, labels: cronJob.Spec.JobTemplate.Spec.Template.Labels, spec: cronJob.Spec.JobTemplate.Spec.Template.Spec})
+	}
+	return nil
 }
 
 // DetermineDeletion determines whether a resource should be deleted.
