@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/kubernetes-1.21%2B-326CE5?logo=kubernetes&logoColor=white" alt="Kubernetes 1.21+"></a>
+  <a href="#kubernetes-compatibility"><img src="https://img.shields.io/badge/kubernetes-1.21%2B-326CE5?logo=kubernetes&logoColor=white" alt="Kubernetes 1.21+"></a>
   <a href="https://go.dev"><img src="https://img.shields.io/badge/go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?logo=apache" alt="License: Apache-2.0"></a>
   <a href="INSTALL.md"><img src="https://img.shields.io/badge/platforms-linux%20%7C%20macOS%20%7C%20windows-informational?logo=linux" alt="Platforms"></a>
