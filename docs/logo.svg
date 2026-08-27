@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="kubectl-harvest logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3E7BEA"/>
+      <stop offset="1" stop-color="#2A5FB8"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" rx="48" fill="url(#bg)"/>
+  <!-- wheat stalk -->
+  <g fill="#FFFFFF">
+    <rect x="115" y="92" width="10" height="100" rx="5"/>
+    <ellipse cx="120" cy="74" rx="13" ry="24"/>
+    <ellipse cx="92" cy="106" rx="11" ry="22" transform="rotate(-35 92 106)"/>
+    <ellipse cx="148" cy="106" rx="11" ry="22" transform="rotate(35 148 106)"/>
+    <ellipse cx="92" cy="144" rx="11" ry="22" transform="rotate(-35 92 144)"/>
+    <ellipse cx="148" cy="144" rx="11" ry="22" transform="rotate(35 148 144)"/>
+    <ellipse cx="92" cy="182" rx="11" ry="22" transform="rotate(-35 92 182)"/>
+    <ellipse cx="148" cy="182" rx="11" ry="22" transform="rotate(35 148 182)"/>
+  </g>
+</svg>

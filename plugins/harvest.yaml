@@ -1,0 +1,72 @@
+apiVersion: krew.googlecontainertools.github.com/v1alpha2
+kind: Plugin
+metadata:
+  name: harvest
+spec:
+  version: v1.0.0
+  homepage: https://github.com/vivektech/kubectl-harvest
+  shortDescription: Delete unused Kubernetes resources.
+  description: |
+    kubectl-harvest is a kubectl plugin that deletes unused Kubernetes resources.
+
+    Supported resources:
+    - Pods (whose status is not Running)
+    - ReplicaSets (scaled down to 0 replicas; the live revision and the newest revisions of each Deployment are always kept for rollback, configurable via --keep-revisions, default 5)
+    - ConfigMaps (not referenced by any Pods or workload Pod templates)
+    - Secrets (not referenced by any Pods, workload Pod templates, ServiceAccounts, Ingress TLS, or ExternalSecrets)
+    - PersistentVolumes (not satisfying any PersistentVolumeClaims)
+    - PersistentVolumeClaims (not referenced by any Pods or workload Pod templates)
+    - Jobs (completed)
+    - PodDisruptionBudgets (not targeting any Pods)
+    - HorizontalPodAutoscalers (not targeting any resources)
+    - NetworkPolicies (not selecting any Pods)
+
+    Built against Kubernetes 1.36 client libraries; works with clusters 1.21+.
+    Successor of the archived micnncim/kubectl-reap.
+  caveats: |
+    This plugin deletes resources. Always run with --dry-run=client or
+    --interactive first to review what would be deleted, especially in
+    production. Resources in kube-system are never touched.
+  platforms:
+  - selector:
+      matchLabels:
+        os: darwin
+        arch: amd64
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_darwin_amd64.tar.gz
+    sha256: PLACEHOLDER_DARWIN_AMD64
+    bin: kubectl-harvest
+  - selector:
+      matchLabels:
+        os: darwin
+        arch: arm64
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_darwin_arm64.tar.gz
+    sha256: PLACEHOLDER_DARWIN_ARM64
+    bin: kubectl-harvest
+  - selector:
+      matchLabels:
+        os: linux
+        arch: amd64
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_linux_amd64.tar.gz
+    sha256: PLACEHOLDER_LINUX_AMD64
+    bin: kubectl-harvest
+  - selector:
+      matchLabels:
+        os: linux
+        arch: arm64
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_linux_arm64.tar.gz
+    sha256: PLACEHOLDER_LINUX_ARM64
+    bin: kubectl-harvest
+  - selector:
+      matchLabels:
+        os: windows
+        arch: amd64
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_windows_amd64.zip
+    sha256: PLACEHOLDER_WINDOWS_AMD64
+    bin: kubectl-harvest.exe
+  - selector:
+      matchLabels:
+        os: windows
+        arch: arm64
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_windows_arm64.zip
+    sha256: PLACEHOLDER_WINDOWS_ARM64
+    bin: kubectl-harvest.exe

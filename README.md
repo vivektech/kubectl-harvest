@@ -1,14 +1,31 @@
-# kubectl-harvest
+<p align="center">
+  <img src="docs/logo.svg" width="160" alt="kubectl-harvest logo">
+</p>
 
-[![Test](https://github.com/vivektech/kubectl-harvest/actions/workflows/test.yml/badge.svg)](https://github.com/vivektech/kubectl-harvest/actions/workflows/test.yml)
-[![Release](https://github.com/vivektech/kubectl-harvest/actions/workflows/release.yml/badge.svg)](https://github.com/vivektech/kubectl-harvest/actions/workflows/release.yml)
-[![License: Apache-2.0](https://img.shields.io/github/license/vivektech/kubectl-harvest?style=flat-square)](LICENSE)
+<h1 align="center">kubectl-harvest</h1>
+
+<p align="center"><strong>Delete unused Kubernetes resources.</strong><br>
+<em>A kubectl plugin that reaps the leftovers every cluster accumulates.</em></p>
+
+<p align="center">
+  <a href="https://github.com/vivektech/kubectl-harvest/actions/workflows/test.yml"><img src="https://github.com/vivektech/kubectl-harvest/actions/workflows/test.yml/badge.svg" alt="Test"></a>
+  <a href="https://github.com/vivektech/kubectl-harvest/actions/workflows/lint.yml"><img src="https://github.com/vivektech/kubectl-harvest/actions/workflows/lint.yml/badge.svg" alt="Lint"></a>
+  <a href="https://github.com/vivektech/kubectl-harvest/releases"><img src="https://img.shields.io/github/v/release/vivektech/kubectl-harvest?logo=github&label=release" alt="Release"></a>
+  <a href="https://pkg.go.dev/github.com/vivektech/kubectl-harvest"><img src="https://pkg.go.dev/badge/github.com/vivektech/kubectl-harvest.svg" alt="Go Reference"></a>
+</p>
+
+<p align="center">
+  <a href="#"><img src="https://img.shields.io/badge/kubernetes-1.21%2B-326CE5?logo=kubernetes&logoColor=white" alt="Kubernetes 1.21+"></a>
+  <a href="https://go.dev"><img src="https://img.shields.io/badge/go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?logo=apache" alt="License: Apache-2.0"></a>
+  <a href="INSTALL.md"><img src="https://img.shields.io/badge/platforms-linux%20%7C%20macOS%20%7C%20windows-informational?logo=linux" alt="Platforms"></a>
+</p>
+
+---
 
 `kubectl-harvest` is a kubectl plugin that finds and deletes **unused** Kubernetes resources — the leftovers that pile up in every cluster: completed Jobs, unreferenced ConfigMaps and Secrets, orphaned volumes, scaled-away ReplicaSets.
 
 It is the maintained successor of [micnncim/kubectl-reap](https://github.com/micnncim/kubectl-reap), which was archived and no longer works on modern clusters. Full credits to the original author and contributors — see [Credits](#credits).
-
----
 
 ## How it works, in simple words
 
