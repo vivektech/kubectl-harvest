@@ -52,8 +52,8 @@ $ kubectl krew install vivektech/harvest
 Apple Silicon (M1/M2/M3/M4):
 
 ```console
-$ curl -LO https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_darwin_arm64.tar.gz
-$ tar -xzf kubectl-harvest_1.0.0_darwin_arm64.tar.gz
+$ curl -LO https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_darwin_arm64.tar.gz
+$ tar -xzf kubectl-harvest_1.0.1_darwin_arm64.tar.gz
 $ sudo mv kubectl-harvest /usr/local/bin/
 $ kubectl harvest --version
 ```
@@ -61,8 +61,8 @@ $ kubectl harvest --version
 Intel:
 
 ```console
-$ curl -LO https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_darwin_amd64.tar.gz
-$ tar -xzf kubectl-harvest_1.0.0_darwin_amd64.tar.gz
+$ curl -LO https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_darwin_amd64.tar.gz
+$ tar -xzf kubectl-harvest_1.0.1_darwin_amd64.tar.gz
 $ sudo mv kubectl-harvest /usr/local/bin/
 $ kubectl harvest --version
 ```
@@ -102,19 +102,19 @@ $ kubectl krew install vivektech/harvest
 x86-64:
 
 ```console
-$ curl -LO https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_linux_amd64.tar.gz
+$ curl -LO https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_linux_amd64.tar.gz
 ```
 
 ARM64 (Graviton, Ampere, Raspberry Pi 4/5 with a 64-bit OS):
 
 ```console
-$ curl -LO https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.0/kubectl-harvest_1.0.0_linux_arm64.tar.gz
+$ curl -LO https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_linux_arm64.tar.gz
 ```
 
 Then, either root-wide or per-user:
 
 ```console
-$ tar -xzf kubectl-harvest_1.0.0_linux_*.tar.gz
+$ tar -xzf kubectl-harvest_1.0.1_linux_*.tar.gz
 
 # root-wide
 $ sudo mv kubectl-harvest /usr/local/bin/
@@ -148,12 +148,12 @@ Works in PowerShell or CMD (Krew on Windows requires `kubectl` 1.22+):
 
 ### Option 2 — Prebuilt binary
 
-Download `kubectl-harvest_1.0.0_windows_amd64.zip` (or `..._windows_arm64.zip` on ARM devices) from the [Releases](https://github.com/vivektech/kubectl-harvest/releases) page, extract `kubectl-harvest.exe`, and put it somewhere on your `PATH`.
+Download `kubectl-harvest_1.0.1_windows_amd64.zip` (or `..._windows_arm64.zip` on ARM devices) from the [Releases](https://github.com/vivektech/kubectl-harvest/releases) page, extract `kubectl-harvest.exe`, and put it somewhere on your `PATH`.
 
 PowerShell example:
 
 ```powershell
-PS> Expand-Archive kubectl-harvest_1.0.0_windows_amd64.zip -DestinationPath $env:USERPROFILE\bin
+PS> Expand-Archive kubectl-harvest_1.0.1_windows_amd64.zip -DestinationPath $env:USERPROFILE\bin
 PS> $env:Path += ";$env:USERPROFILE\bin"          # for this session
 # persist permanently:
 PS> [Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\bin", "User")
