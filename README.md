@@ -114,8 +114,8 @@ brew install kubectl-harvest
 or
 
 ```
-kubectl krew index add vivek https://github.com/vivektech/kubectl-harvest
-kubectl krew install vivek/harvest
+kubectl krew index add vivektech https://github.com/vivektech/kubectl-harvest
+kubectl krew install vivektech/harvest
 ```
 
 or

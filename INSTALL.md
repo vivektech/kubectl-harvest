@@ -41,8 +41,8 @@ $ brew upgrade kubectl-harvest
 ### Option 2 — Krew
 
 ```console
-$ kubectl krew index add vivek https://github.com/vivektech/kubectl-harvest
-$ kubectl krew install vivek/harvest
+$ kubectl krew index add vivektech https://github.com/vivektech/kubectl-harvest
+$ kubectl krew install vivektech/harvest
 ```
 
 (If you don't have Krew yet: https://krew.sigs.k8s.io/docs/user-guide/setup/install/)
@@ -93,8 +93,8 @@ $ brew install kubectl-harvest
 ### Option 2 — Krew
 
 ```console
-$ kubectl krew index add vivek https://github.com/vivektech/kubectl-harvest
-$ kubectl krew install vivek/harvest
+$ kubectl krew index add vivektech https://github.com/vivektech/kubectl-harvest
+$ kubectl krew install vivektech/harvest
 ```
 
 ### Option 3 — Prebuilt binary
@@ -142,8 +142,8 @@ $ go install github.com/vivektech/kubectl-harvest/cmd/kubectl-harvest@latest
 Works in PowerShell or CMD (Krew on Windows requires `kubectl` 1.22+):
 
 ```console
-> kubectl krew index add vivek https://github.com/vivektech/kubectl-harvest
-> kubectl krew install vivek/harvest
+> kubectl krew index add vivektech https://github.com/vivektech/kubectl-harvest
+> kubectl krew install vivektech/harvest
 ```
 
 ### Option 2 — Prebuilt binary
