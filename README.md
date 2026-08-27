@@ -94,9 +94,15 @@ No static analysis can be perfect, because **operators and external systems can 
 
 Built against **Kubernetes 1.36** client libraries (`k8s.io/* v0.36.4`) — no legacy dependencies.
 
-- Tested target: **Kubernetes 1.34–1.36**
-- Works with: any cluster **1.21 or newer** (every API used is stable since 1.21)
-- Older clusters: still runs; newer detection sources (CronJobs, Ingresses, ExternalSecrets) are skipped gracefully when not served
+| Kubernetes cluster version | Status | Notes |
+| --- | :---: | --- |
+| 1.37 and newer | ✅ | Only stable APIs are used, so future minors keep working |
+| **1.34 – 1.36** | ✅ | **Tested target** — primary development and CI focus |
+| 1.21 – 1.33 | ✅ | Full feature set; every API used (`policy/v1` PDB, `batch/v1` CronJobs, `networking.k8s.io/v1` Ingresses and NetworkPolicies) has been stable since 1.21 |
+| 1.19 – 1.20 | ⚠️ | Runs with reduced detection: CronJob and ExternalSecret references are skipped (`batch/v1` CronJobs not yet served); everything else works |
+| 1.18 and older | ⚠️ | Additionally no Ingress TLS detection (`networking.k8s.io/v1` not yet served); PDB reaping still works — `policy/v1beta1` and `policy/v1` fields are identical |
+
+✅ = fully supported · ⚠️ = runs safely with some reference detection disabled
 
 The original kubectl-reap was built against Kubernetes 1.19 and used `policy/v1beta1`, which was removed in Kubernetes 1.25 — that is why it stopped working; this project uses `policy/v1` and current libraries.
 
