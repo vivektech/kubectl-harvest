@@ -1,4 +1,5 @@
 bin/
 build/
-coverage.out
 dist/
+coverage.out
+.mimosa/
