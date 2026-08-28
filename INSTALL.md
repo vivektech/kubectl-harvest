@@ -35,7 +35,16 @@ $ brew install kubectl-harvest
 To upgrade later:
 
 ```console
+$ brew update
 $ brew upgrade kubectl-harvest
+```
+
+`brew update` matters: since Homebrew 4, `brew upgrade <formula>` does not always refresh third-party taps first (and never does when `HOMEBREW_NO_AUTO_UPDATE=1` is set), so without it brew keeps seeing the old formula. If the tap still won't move, re-add it:
+
+```console
+$ brew untap vivektech/kubectl-harvest
+$ brew tap vivektech/kubectl-harvest https://github.com/vivektech/kubectl-harvest
+$ brew install kubectl-harvest
 ```
 
 ### Option 2 — Krew
