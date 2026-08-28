@@ -5,21 +5,21 @@
 class KubectlHarvest < Formula
   desc "kubectl plugin that deletes unused Kubernetes resources"
   homepage "https://github.com/vivektech/kubectl-harvest"
-  version "1.0.1"
+  version "1.0.2"
   license "Apache-2.0"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_darwin_amd64.tar.gz"
-      sha256 "9ac236a088feea4ff38bd1d133a2daf48b4d2a7a97980e5fc2cd0ef39abaeaf4"
+      url "https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_darwin_amd64.tar.gz"
+      sha256 "3bb6f082843ca7d868223cbbcb0e3aff63bbd0a265eb4432c23fc4ecf735f753"
 
       define_method(:install) do
         bin.install "kubectl-harvest"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_darwin_arm64.tar.gz"
-      sha256 "59e3d1bc9916c6fda5407d04fb60533a76bb237df41149152c4bf1d4bd653efd"
+      url "https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_darwin_arm64.tar.gz"
+      sha256 "b94f86ae9cc43e308de959f68b657a72d26c25beb29321f0102070a720a10b2a"
 
       define_method(:install) do
         bin.install "kubectl-harvest"
@@ -29,15 +29,15 @@ class KubectlHarvest < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_linux_amd64.tar.gz"
-      sha256 "9fdbb4e99cfa178f433081ea698c2faef42c6b5fc733a6016bebb6d2b98509b5"
+      url "https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_linux_amd64.tar.gz"
+      sha256 "2985193c103aee81251420d84f4a13928393227481f4630b14613f43c63b6552"
       define_method(:install) do
         bin.install "kubectl-harvest"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_linux_arm64.tar.gz"
-      sha256 "85502c1373e6581f1312b40e4d403fc80f97ac1c834367991922c8f020d0a49a"
+      url "https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_linux_arm64.tar.gz"
+      sha256 "42f7e8d4e7ed5e852bd252e0832da1f63af985062801e13eb62b50a5bca87b72"
       define_method(:install) do
         bin.install "kubectl-harvest"
       end
