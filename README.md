@@ -76,6 +76,7 @@ This is the part we verified line by line, with unit tests for each rule:
 **Process rails:**
 
 - `--dry-run=client` (or `=server`) prints exactly what would be deleted without deleting anything. **Always start here.**
+- An **RBAC pre-flight check** runs before any work: it verifies via `SelfSubjectAccessReview` (the `kubectl auth can-i` mechanism — available to every authenticated user, no extra permissions needed) that your user can read everything the run needs. If permissions are missing you get one clean list up front — for example `missing: list ingresses.networking.k8s.io` — instead of a mid-run wall of Forbidden errors, and nothing is deleted. Dry-runs only need read access; `delete` on the reaped kind is checked only for real runs.
 - `--interactive` asks yes/no for every single resource before deleting.
 - `--skip-controller-owned` skips Pods managed by controllers (they'd just be recreated).
 - Deletions go through the standard Kubernetes API with normal grace periods; RBAC applies as usual.

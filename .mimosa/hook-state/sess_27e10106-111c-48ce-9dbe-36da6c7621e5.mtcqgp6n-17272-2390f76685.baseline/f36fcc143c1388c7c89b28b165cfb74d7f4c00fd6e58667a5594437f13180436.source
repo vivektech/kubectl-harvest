@@ -19,14 +19,12 @@ import (
 	"k8s.io/cli-runtime/pkg/printers"
 	cliresource "k8s.io/cli-runtime/pkg/resource"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	cmdwait "k8s.io/kubectl/pkg/cmd/wait"
 
 	"github.com/vivektech/kubectl-harvest/pkg/determiner"
-	"github.com/vivektech/kubectl-harvest/pkg/preflight"
 	"github.com/vivektech/kubectl-harvest/pkg/prompt"
 	"github.com/vivektech/kubectl-harvest/pkg/resource"
 	"github.com/vivektech/kubectl-harvest/pkg/version"
@@ -137,7 +135,7 @@ func NewCmdReap(streams genericclioptions.IOStreams) *cobra.Command {
 			f := cmdutil.NewFactory(r.configFlags)
 
 			cmdutil.CheckErr(r.Validate(args))
-			cmdutil.CheckErr(r.Complete(ctx, f, args, cmd))
+			cmdutil.CheckErr(r.Complete(f, args, cmd))
 			cmdutil.CheckErr(r.Run(ctx, f))
 		},
 	}
@@ -163,7 +161,7 @@ func NewCmdReap(streams genericclioptions.IOStreams) *cobra.Command {
 	return cmd
 }
 
-func (r *runner) Complete(ctx context.Context, f cmdutil.Factory, args []string, cmd *cobra.Command) error {
+func (r *runner) Complete(f cmdutil.Factory, args []string, cmd *cobra.Command) error {
 	if !r.forceDeletion && r.gracePeriod == 0 {
 		// To preserve backwards compatibility, but prevent accidental data loss, we convert --grace-period=0
 		// into --grace-period=1. Users may provide --force to bypass this conversion.
@@ -204,23 +202,12 @@ func (r *runner) Complete(ctx context.Context, f cmdutil.Factory, args []string,
 	if err != nil {
 		return err
 	}
+	resourceClient := resource.NewClient(clientset, r.dynamicClient)
 
 	namespace := r.namespace
 	if r.allNamespaces {
 		namespace = metav1.NamespaceAll
 	}
-
-	// RBAC pre-flight check: verify every permission this run needs before
-	// any listing or deletion happens, so restricted users get one clear
-	// message instead of mid-run Forbidden errors. A failure of the check
-	// itself (rare) only warns and proceeds.
-	if kinds := preflight.KindsForResourceTypes(args[0]); len(kinds) > 0 {
-		if err := r.runPreflightCheck(ctx, f, clientset, kinds, namespace); err != nil {
-			return err
-		}
-	}
-
-	resourceClient := resource.NewClient(clientset, r.dynamicClient)
 
 	r.determiner, err = determiner.New(resourceClient, r.result, namespace, determiner.Options{
 		KeepRevisions: r.keepRevisions,
@@ -229,49 +216,6 @@ func (r *runner) Complete(ctx context.Context, f cmdutil.Factory, args []string,
 		return err
 	}
 
-	return nil
-}
-
-// runPreflightCheck reports missing permissions as a single actionable
-// error. When the SelfSubjectAccessReview calls themselves fail, it warns
-// and lets the run proceed as it would have without the check.
-func (r *runner) runPreflightCheck(ctx context.Context, f cmdutil.Factory, clientset kubernetes.Interface, kinds []string, namespace string) error {
-	var groups *metav1.APIGroupList
-	groupServed := func(group string) bool {
-		if groups == nil {
-			discoveryClient, err := f.ToDiscoveryClient()
-			if err != nil {
-				return true // fail open: include the check rather than skip it
-			}
-			if groups, err = discoveryClient.ServerGroups(); err != nil {
-				return true
-			}
-		}
-		for _, g := range groups.Groups {
-			if g.Name == group {
-				return true
-			}
-		}
-		return false
-	}
-
-	missing, err := preflight.Run(ctx, clientset, preflight.Options{
-		Kinds:         kinds,
-		Namespace:     namespace,
-		IncludeDelete: r.dryRunStrategy == cmdutil.DryRunNone,
-		GroupServed:   groupServed,
-	})
-	if err != nil {
-		r.Errorf("warning: could not run RBAC pre-flight check: %v\n", err)
-		return nil
-	}
-	if len(missing) > 0 {
-		return &preflight.MissingPermissionsError{
-			Missing:       missing,
-			Namespace:     r.namespace,
-			AllNamespaces: r.allNamespaces,
-		}
-	}
 	return nil
 }
 
