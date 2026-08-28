@@ -3,7 +3,7 @@ kind: Plugin
 metadata:
   name: harvest
 spec:
-  version: v1.0.1
+  version: v1.0.2
   homepage: https://github.com/vivektech/kubectl-harvest
   shortDescription: Delete unused Kubernetes resources.
   description: |
@@ -32,41 +32,41 @@ spec:
       matchLabels:
         os: darwin
         arch: amd64
-    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_darwin_amd64.tar.gz
-    sha256: 9ac236a088feea4ff38bd1d133a2daf48b4d2a7a97980e5fc2cd0ef39abaeaf4
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_darwin_amd64.tar.gz
+    sha256: 3bb6f082843ca7d868223cbbcb0e3aff63bbd0a265eb4432c23fc4ecf735f753
     bin: kubectl-harvest
   - selector:
       matchLabels:
         os: darwin
         arch: arm64
-    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_darwin_arm64.tar.gz
-    sha256: 59e3d1bc9916c6fda5407d04fb60533a76bb237df41149152c4bf1d4bd653efd
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_darwin_arm64.tar.gz
+    sha256: b94f86ae9cc43e308de959f68b657a72d26c25beb29321f0102070a720a10b2a
     bin: kubectl-harvest
   - selector:
       matchLabels:
         os: linux
         arch: amd64
-    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_linux_amd64.tar.gz
-    sha256: 9fdbb4e99cfa178f433081ea698c2faef42c6b5fc733a6016bebb6d2b98509b5
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_linux_amd64.tar.gz
+    sha256: 2985193c103aee81251420d84f4a13928393227481f4630b14613f43c63b6552
     bin: kubectl-harvest
   - selector:
       matchLabels:
         os: linux
         arch: arm64
-    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_linux_arm64.tar.gz
-    sha256: 85502c1373e6581f1312b40e4d403fc80f97ac1c834367991922c8f020d0a49a
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_linux_arm64.tar.gz
+    sha256: 42f7e8d4e7ed5e852bd252e0832da1f63af985062801e13eb62b50a5bca87b72
     bin: kubectl-harvest
   - selector:
       matchLabels:
         os: windows
         arch: amd64
-    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_windows_amd64.zip
-    sha256: f36fbc908bb6e62dfb13ab1f05ec5ae1baffe5975f481e1d8d1ae87df3e886a4
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_windows_amd64.zip
+    sha256: 55862adab24f433bf29d097b29ab8a972888a9093653ef793ad846949cf58029
     bin: kubectl-harvest.exe
   - selector:
       matchLabels:
         os: windows
         arch: arm64
-    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.1/kubectl-harvest_1.0.1_windows_arm64.zip
-    sha256: a9aa5560fede544f9824fdbb7907ca37927dd1c879ccce64d1f8547f977731f4
+    uri: https://github.com/vivektech/kubectl-harvest/releases/download/v1.0.2/kubectl-harvest_1.0.2_windows_arm64.zip
+    sha256: 68b25da49b05a62f40bbd7e34f2563aed2bc3e92f15be28815e3d731a0f8c320
     bin: kubectl-harvest.exe
